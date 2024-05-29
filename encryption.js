@@ -31,7 +31,7 @@ class Encryption {
     encrypt(message, publicKey){
         const key = Number(this.#keys[publicKey]);
         return message.split('').map((char, i) => {
-            const encodedChar = (char.charCodeAt(0) + Math.round(Math.sin(i * key) * key)); // Use modulo to wrap around Unicode range
+            const encodedChar = (char.charCodeAt(0) + Math.round(Math.sin((i + key) * key) * key)); // Use modulo to wrap around Unicode range
             return String.fromCharCode(encodedChar);
         }).join('');
     }
@@ -40,7 +40,7 @@ class Encryption {
     decrypt(message, publicKey){
         const key = Number(this.#keys[publicKey]);
         return message.split('').map((char, i) => {
-            const decodedChar = (char.charCodeAt(0) - Math.round(Math.sin(i * key) * key)); // Use modulo to wrap around Unicode range and handle negative values
+            const decodedChar = (char.charCodeAt(0) - Math.round(Math.sin((i + key) * key) * key)); // Use modulo to wrap around Unicode range and handle negative values
             return String.fromCharCode(decodedChar);
         }).join('');
     }
@@ -56,7 +56,7 @@ alice.establishKey(bob.publicKey);
 bob.establishKey(alice.publicKey);
 
 // Alice sends a message to Bob
-const messageFromAlice = "Hello Bob! (≧◡≦)";
+const messageFromAlice = "你好鲍勃！(≧◡≦)"; // "Hello Bob! (≧◡≦)"
 const encryptedMessage = alice.encrypt(messageFromAlice, bob.publicKey);
 console.log("Encrypted Message from Alice to Bob:", encryptedMessage);
 
@@ -82,4 +82,5 @@ console.log("Intercepted and Decrypted Reply by Eve:", interceptedReplyByEve);
 // Alice decrypts Bob's reply
 const decryptedReply = alice.decrypt(encryptedReply, bob.publicKey);
 console.log("Decrypted Reply at Alice's end:", decryptedReply);
+
 
