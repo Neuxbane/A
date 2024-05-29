@@ -1,10 +1,10 @@
 class Encryption {
+    #privateKey = BigInt(Math.round(Math.random()*1000)); // Randomly generated private key
+    #keys = {}; // Object to store established keys
     constructor(base, modulo){
         this.base = BigInt(base); // Base for the encryption calculations
         this.modulo = BigInt(modulo); // Modulo for the encryption calculations
-        this.privateKey = BigInt(Math.round(Math.random()*1000)); // Randomly generated private key
-        this.publicKey = (this.base**this.privateKey) % this.modulo; // Public key derived from base and private key
-        this.keys = {}; // Object to store established keys
+        this.publicKey = (this.base**this.#privateKey) % this.modulo; // Public key derived from base and private key
     }
 
     // Function to get the i-th prime number
@@ -22,14 +22,14 @@ class Encryption {
 
     // Establish a shared key using another party's public key
     establishKey(publicKey){
-        const sharedSecret = (BigInt(publicKey)**this.privateKey) % this.modulo;
-        this.keys[publicKey] = sharedSecret;
+        const sharedSecret = (BigInt(publicKey)**this.#privateKey) % this.modulo;
+        this.#keys[publicKey] = sharedSecret;
         console.log(`Established key with public key ${publicKey}: ${sharedSecret}`);
     }
     
     // Encrypt a message using a previously established key
     encrypt(message, publicKey){
-        const key = Number(this.keys[publicKey]);
+        const key = Number(this.#keys[publicKey]);
         return message.split('').map((char, i) => {
             const encodedChar = (char.charCodeAt(0) + Math.round(Math.sin(i * key) * key)); // Use modulo to wrap around Unicode range
             return String.fromCharCode(encodedChar);
@@ -38,7 +38,7 @@ class Encryption {
 
     // Decrypt a message using a previously established key
     decrypt(message, publicKey){
-        const key = Number(this.keys[publicKey]);
+        const key = Number(this.#keys[publicKey]);
         return message.split('').map((char, i) => {
             const decodedChar = (char.charCodeAt(0) - Math.round(Math.sin(i * key) * key)); // Use modulo to wrap around Unicode range and handle negative values
             return String.fromCharCode(decodedChar);
