@@ -1,12 +1,13 @@
-class encryption {
+class Encryption {
     constructor(base, modulo){
-        this.base = BigInt(base);
-        this.modulo = BigInt(modulo);
-        this.privateKey = BigInt(Math.round(Math.random()*1000));
-        this.publicKey = (this.base**this.privateKey) % this.modulo;
-        this.keys = {};
+        this.base = BigInt(base); // Base for the encryption calculations
+        this.modulo = BigInt(modulo); // Modulo for the encryption calculations
+        this.privateKey = BigInt(Math.round(Math.random()*1000)); // Randomly generated private key
+        this.publicKey = (this.base**this.privateKey) % this.modulo; // Public key derived from base and private key
+        this.keys = {}; // Object to store established keys
     }
 
+    // Function to get the i-th prime number
     getPrime(i) {
         const isPrime = n => {
             for (let j = 2; j * j <= n; j++)
@@ -19,12 +20,14 @@ class encryption {
         }
     }
 
+    // Establish a shared key using another party's public key
     establishKey(publicKey){
         const sharedSecret = (BigInt(publicKey)**this.privateKey) % this.modulo;
         this.keys[publicKey] = sharedSecret;
         console.log(`Established key with public key ${publicKey}: ${sharedSecret}`);
     }
     
+    // Encrypt a message using a previously established key
     encrypt(message, publicKey){
         const key = Number(this.keys[publicKey]);
         return message.split('').map((char, i) => {
@@ -33,6 +36,7 @@ class encryption {
         }).join('');
     }
 
+    // Decrypt a message using a previously established key
     decrypt(message, publicKey){
         const key = Number(this.keys[publicKey]);
         return message.split('').map((char, i) => {
@@ -41,13 +45,17 @@ class encryption {
         }).join('');
     }
 }
-const alice = new encryption(29, 2633);
-const bob = new encryption(29, 2633);
-const eve = new encryption(29, 2633); // Eve is the third person trying to intercept the messages
 
+// Initialize encryption objects for Alice, Bob, and Eve
+const alice = new Encryption(29, 2633);
+const bob = new Encryption(29, 2633);
+const eve = new Encryption(29, 2633); // Eve is the third person trying to intercept the messages
+
+// Establish keys between Alice and Bob
 alice.establishKey(bob.publicKey);
 bob.establishKey(alice.publicKey);
 
+// Alice sends a message to Bob
 const messageFromAlice = "Hello Bob! (≧◡≦)";
 const encryptedMessage = alice.encrypt(messageFromAlice, bob.publicKey);
 console.log("Encrypted Message from Alice to Bob:", encryptedMessage);
@@ -57,9 +65,11 @@ eve.establishKey(alice.publicKey);
 const interceptedMessageByEve = eve.decrypt(encryptedMessage, alice.publicKey);
 console.log("Intercepted and Decrypted Message by Eve:", interceptedMessageByEve);
 
+// Bob decrypts Alice's message
 const decryptedMessage = bob.decrypt(encryptedMessage, alice.publicKey);
 console.log("Decrypted Message at Bob's end:", decryptedMessage);
 
+// Bob replies to Alice
 const messageFromBob = "Hi Alice! (^_^)";
 const encryptedReply = bob.encrypt(messageFromBob, alice.publicKey);
 console.log("Encrypted Reply from Bob to Alice:", encryptedReply);
@@ -69,6 +79,7 @@ eve.establishKey(bob.publicKey);
 const interceptedReplyByEve = eve.decrypt(encryptedReply, bob.publicKey);
 console.log("Intercepted and Decrypted Reply by Eve:", interceptedReplyByEve);
 
+// Alice decrypts Bob's reply
 const decryptedReply = alice.decrypt(encryptedReply, bob.publicKey);
 console.log("Decrypted Reply at Alice's end:", decryptedReply);
 
