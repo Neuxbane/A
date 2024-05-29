@@ -32,15 +32,15 @@ This project showcases the use of asymmetric encryption for secure communication
 // Example code snippets for using the encryption class
 
 // Initialize parties with public and private keys
-const alice = new encryption(29, 2633);
-const bob = new encryption(29, 2633);
+const alice = new Encryption(29, 5937137);
+const bob = new Encryption(29, 5937137);
 
 // Establish keys between parties
 alice.establishKey(bob.publicKey);
 bob.establishKey(alice.publicKey);
 
 // Encrypt and decrypt messages
-const messageFromAlice = "Hello Bob! (≧◡≦)";
+const messageFromAlice = "你好鲍勃！(≧◡≦)"; // "Hello Bob! (≧◡≦)"
 const encryptedMessage = alice.encrypt(messageFromAlice, bob.publicKey);
 const decryptedMessage = bob.decrypt(encryptedMessage, alice.publicKey);
 
