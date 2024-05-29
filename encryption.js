@@ -32,7 +32,7 @@ class Encryption {
             substituteChar = '';
 
             // Find a unique character to use as a substitute
-            for (let i = 1; i < 0xfff; i++) {
+            for (let i = 0; i < 0xfff; i++) {
                 const char = String.fromCharCode(i);
                 if (!uniqueChars.has(char)) {
                     substituteChar = char;
