@@ -47,9 +47,9 @@ class Encryption {
 }
 
 // Initialize encryption objects for Alice, Bob, and Eve
-const alice = new Encryption(29, 2633);
-const bob = new Encryption(29, 2633);
-const eve = new Encryption(29, 2633); // Eve is the third person trying to intercept the messages
+const alice = new Encryption(29, 5937137);
+const bob = new Encryption(29, 5937137);
+const eve = new Encryption(29, 5937137); // Eve is the third person trying to intercept the messages
 
 // Establish keys between Alice and Bob
 alice.establishKey(bob.publicKey);
