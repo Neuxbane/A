@@ -185,4 +185,13 @@ function decompression(compressedString) {
     return decompressedString;
 }
 
-module.exports = { Encryption, compression, decompression, getPrime };
+function stringToInt(string){
+    let hash = 1;
+    for (let i = 0; i < string.length; i++) {
+        let char = string.charCodeAt(i);
+        hash = Math.abs(Math.sin(hash*(char+i)));
+    }
+    return hash;
+}
+
+module.exports = { Encryption, compression, decompression, getPrime, stringToInt };
