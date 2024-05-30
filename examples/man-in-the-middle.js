@@ -1,4 +1,4 @@
-const { Encryption } = require('./encryption');
+const { Encryption } = require('./../encryption');
 
 // We agree that we use this base and modulus as public parameters
 const base = 29;
@@ -15,14 +15,6 @@ alice.establishKey(bob.publicKey);
 const eve = new Encryption(base, modulus); // Eve is the third person trying to intercept the messages
 eve.establishKey(alice.publicKey);
 eve.establishKey(bob.publicKey);
-
-
-/*
-    List a problem in real-world scenario that can be solved by this protocol:
-    - Man in the middle problem.
-    - Asyncronous communication problem.
-*/
-
 
 
 /*
@@ -60,9 +52,3 @@ const anotherDecryptedMessage = alice.decrypt(anotherEncryptedMessage, bob.publi
 console.log("Decrypted message by Alice:", anotherDecryptedMessage.message);
 // This is not a problem since Alice successfully get only the first message that delivered by Eve.
 // And Eve is not able to decrypt the message since the message is encrypted with the pair of Bob's and Alice's private key.
-
-
-/*
-    Asyncronous communication problem. (Pending)
-*/
-

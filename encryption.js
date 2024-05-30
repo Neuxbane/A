@@ -1,14 +1,20 @@
 class Encryption {
-    #privateKey = 77n;
+    #privateKey = BigInt(Math.round(Math.random()*10_000_000)); // this is the largest privateKey that can be achieved by node.js as far as I know.
     #keys = {}; // Object to store established keys
-    constructor(base = 29n, modulo = 5937137n, privateKey = Math.round(Math.random()*1000)){
-        this.#privateKey = BigInt(privateKey);
+    #messages = {} // Object to carry unreplied messages
+    constructor(base = 29n, modulo = 5937137n, privateKeyMax = -1){
+        this.hashLength = 16;
+        if(privateKeyMax == -1) privateKeyMax = modulo/(base**2);
+        this.#privateKey = BigInt(Math.round(Math.random()*privateKeyMax));
         this.base = BigInt(base); // Base for the encryption calculations
         this.modulo = BigInt(modulo); // Modulo for the encryption calculations
+        // console.log("Generating public key");
         this.publicKey = (this.base**this.#privateKey) % this.modulo; // Public key derived from base and private key
+        // console.log("Public key", this.publicKey);
     }
 
     hash(number, length){
+        number = Number(number);
         let hash = '';
         const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         for (let i = 0; i < length; i++) {
@@ -19,15 +25,19 @@ class Encryption {
 
     // Establish a shared key using another party's public key
     establishKey(publicKey){
+        // console.log("Establishing key with public key", publicKey);
         const sharedSecret = (BigInt(publicKey)**this.#privateKey) % this.modulo;
+        // console.log("Shared secret", sharedSecret);
         this.#keys[publicKey] = sharedSecret;
+        this.#messages[publicKey] = [];
     }
     
     // Encrypt a unique message once using a previously established key
     encrypt(message, publicKey){
         if(!this.#keys[publicKey]) return Error("Key not established!");
         const key = Number(this.#keys[publicKey]);
-        message = this.hash(key, 16) + message;
+        this.#messages[publicKey].push({message, hash: this.hash(key, this.hashLength)});
+        message = this.hash(key, this.hashLength) + message;
         const payload = message.split('').map((char, i) => {
             const encodedChar = (char.charCodeAt(0) + Math.round(Math.sin((i + key) * key) * key)); // Use modulo to wrap around Unicode range
             return String.fromCharCode(encodedChar);
@@ -45,12 +55,29 @@ class Encryption {
             const decodedChar = (char.charCodeAt(0) - Math.round(Math.sin((i + key) * key) * key)); // Use modulo to wrap around Unicode range and handle negative values
             return String.fromCharCode(decodedChar);
         }).join('');
-        const hash = payload.slice(0, 16);
-        const content = payload.slice(16);
-        if(hash!==this.hash(key, 16)) return Error("Hash mismatch");
+        const hash = payload.slice(0, this.hashLength);
+        const content = payload.slice(this.hashLength);
+        if(hash!==this.hash(key, this.hashLength)) return Error("Hash mismatch");
+        this.#messages[publicKey] = [];
         const numberModulo = Number(this.modulo);
         this.#keys[publicKey] = BigInt(Math.round(((Math.sin(Number(this.#keys[publicKey]))**2)+numberModulo/2)*numberModulo)%numberModulo);
         return content;
+    }
+
+    // Implement Automatic Repeat reQuest (ARQ)
+    receiveARQ(ARQ, publicKey){
+        const sharedSecret = (BigInt(publicKey)**this.#privateKey) % this.modulo;
+        const key = Number(ARQ)-Number(sharedSecret);
+        this.#keys[publicKey] = BigInt(key);
+        const lastMessageHash = this.hash(key, this.hashLength);
+        const lastMessageIndex = this.#messages[publicKey].findIndex(message => message.hash === lastMessageHash);
+        if(lastMessageIndex === -1) return Error("No unreplied messages found!");
+        return this.#messages[publicKey].slice(lastMessageIndex).map(payload => this.encrypt(payload.message, publicKey));
+    }
+
+    sendARQ(publicKey){
+        const sharedSecret = (BigInt(publicKey)**this.#privateKey) % this.modulo;
+        return Number(this.#keys[publicKey] + sharedSecret);
     }
 }
 
