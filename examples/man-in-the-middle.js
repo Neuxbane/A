@@ -44,7 +44,7 @@ const eveHoldsAliceMessage = anotherEncryptedMessage;
 console.log("Eve holds Alice's message:", eveHoldsAliceMessage);
 for(let i = 0; i < 3; i++){
     const payload = alice.decrypt(eveHoldsAliceMessage, bob.publicKey)
-    console.log(`Eve spamming ${i+1} time(s) Alice:`, i?payload.message:payload);
+    console.log(`Eve spamming ${i+1} time(s) to Alice:`, i?payload.message:payload);
 }
 
 // Alice tries to decrypt the last encrypted message and did not succesfully decrypt it
